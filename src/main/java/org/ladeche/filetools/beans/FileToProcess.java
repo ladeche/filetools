@@ -1,78 +1,44 @@
 package org.ladeche.filetools.beans;
 
 import java.io.IOException;
+import java.util.ListIterator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FileToProcess {
+public class FileToProcess extends ItemToProcess{
 	
     static final Logger logger = LoggerFactory.getLogger(FileToProcess.class);
-	private String fileFullPath;
-	private String fileRelativePath;
-	private String fileName;
-	private FileExtension fileExt;
-	private Integer id;
 	
-	public FileToProcess (String fileRelativePath, FileExtension fileExt, String sourcedir) {
-		this.fileRelativePath = fileRelativePath;
-		this.fileFullPath = sourcedir+"/"+fileRelativePath.substring(2);
-		this.fileName = fileRelativePath.substring(fileRelativePath.lastIndexOf(".")+1);
-		this.fileExt = fileExt;
+	public FileToProcess (String sourceRelativePath, String sourcedir) {
+		this.sourceRelativePath = sourceRelativePath;
+		this.sourceFullPath = sourcedir+"/"+sourceFullPath.substring(2);
+		this.fileName = sourceRelativePath.substring(sourceRelativePath.lastIndexOf(".")+1);
 	}
+
+	public int countItemsToProcess() {
+        return 1;
+	};
 	
+	public boolean add(ItemToProcess itemToProcessToAdd) {
+        return false;
+	};
+	
+	public boolean remove(ItemToProcess itemToProcessToRemove) {
+        return false;
+	};
+	
+	public ListIterator createListIterator() {
+		return null;
+	};
+
 	@Override
 	public String toString() {
 		return   this.id+":"
-				+this.fileFullPath + ":"
-				+this.fileRelativePath + ":" 
+				+this.sourceFullPath + ":"
+				+this.sourceRelativePath + ":" 
 				+this.fileName;
 
 	}
-	
 
-	public void open() throws IOException {
-   	   	this.fileExt.open(this.fileFullPath);
-    }
-
-	public FileExtension getFileExt() {
-		return fileExt;
-	}
-
-	public void setFileExt(FileExtension fileExt) {
-		this.fileExt = fileExt;
-	}
-
-	
-	public String getFileFullPath() {
-		return fileFullPath;
-	}
-
-	public void setFileFullPath(String fileFullPath) {
-		this.fileFullPath = fileFullPath;
-	}
-
-	public String getFileRelativePath() {
-		return fileRelativePath;
-	}
-
-	public void setFileRelativePath(String fileRelativePath) {
-		this.fileRelativePath = fileRelativePath;
-	}
-
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-    
 }

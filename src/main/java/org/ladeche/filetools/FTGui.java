@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.table.DefaultTableModel;
 
 import org.ladeche.filetools.beans.ExecUnit;
-import org.ladeche.filetools.beans.FileExtension;
 import org.ladeche.filetools.beans.FileToProcess;
 import org.ladeche.filetools.beans.LangLabels;
 import org.ladeche.filetools.utils.FTProperties;
@@ -72,7 +71,6 @@ public class FTGui extends JFrame implements ActionListener,
     
     // Functional attributes
     private ArrayList<String> fileExtList = new ArrayList<String>();
-    private HashMap<String, FileExtension> fileExtMap = new HashMap<String, FileExtension>();
     private HashMap<String, ExecUnit> execUnitMap = new HashMap<String, ExecUnit>();
 
     // Graphical Components ///////////////
@@ -215,23 +213,6 @@ public class FTGui extends JFrame implements ActionListener,
 
         fileExtList = new ArrayList<String>(Arrays.asList(fileExtArray));
 
-        FileExtension fileExtension;
-
-		for (String fileExt : fileExtList) {
-			fileExtension = new FileExtension(fileExt);
-			fileExtension.setFileSearchTool(execUnitMap.get("exec.searchtool."
-					+ configProperties.getProperty("fileext." + fileExt
-							+ ".searchtool")));
-			fileExtension.setFileOpenTool(execUnitMap.get("exec.opentool."
-					+ configProperties.getProperty("fileext." + fileExt
-							+ ".opentool")));
-			fileExtension.setDescription(configProperties
-					.getProperty("fileext." + fileExt + ".description"));
-			fileExtension.setActive(Boolean.valueOf(configProperties
-					.getProperty("fileext." + fileExt + ".active")));
-			fileExtMap.put(fileExt, fileExtension);
-        	logger.debug(">"+fileExtension.toString());
-		}
 
     }
 
@@ -250,8 +231,6 @@ public class FTGui extends JFrame implements ActionListener,
         fexVParallelGroup = glContentPane.createParallelGroup(Alignment.BASELINE);
         for ( String fileExt : fileExtList){
             jCheckBox = new JCheckBox(fileExt);
-            jCheckBox.setSelected(fileExtMap.get(fileExt).getActive());
-            jCheckBox.setToolTipText(fileExtMap.get(fileExt).getDescription());
             jCheckBox.addItemListener(this);
             jCheckBoxMap.put(fileExt, jCheckBox);
             fexHSequentialGroup.addComponent(jCheckBoxMap.get(fileExt));
@@ -463,25 +442,9 @@ public class FTGui extends JFrame implements ActionListener,
 
     		try {
             	filesFound.clear();
-        		for (Map.Entry<String, FileExtension> fext : fileExtMap.entrySet()){
-        			if (fext.getValue().getActive()) {
-        	        	logger.debug("Search "+fext.getKey()+" files");
-                    	filesFoundCurrentExt=fext.getValue().search(txfDirectory.getText(), txfKeyWord.getText());
-        	        	logger.debug(">"+filesFoundCurrentExt.size()+ " files found");
-        				filesFound.addAll(filesFoundCurrentExt);
-        				for (FileToProcess ff : filesFoundCurrentExt) {
-        					ff.setId(i);
-        					file[0]=ff.getId();
-        					file[1]=ff.getFileRelativePath();
-        					//logger.debug(">>"+ff.toString());
-        					tblmdlResult.addRow(file);
-        					i++;
-        				}        			
-    				}
-        		}
 	        	logger.debug("Overall "+filesFound.size()+ " files found");
                 tblResult.setModel(tblmdlResult);
-            } catch (IOException e1) {
+            } catch (Exception e1) {
                 // TODO Auto-generated catch block
                 e1.printStackTrace();
             }
@@ -501,8 +464,7 @@ public class FTGui extends JFrame implements ActionListener,
         JTable targetTable = (JTable) e.getSource();
         try {
         	logger.debug("Opening "+targetTable.getSelectedRow());
-        	filesFound.get(targetTable.getSelectedRow()).open();
-        } catch (IOException e1) {
+        } catch (Exception e1) {
             e1.printStackTrace();
         }
 
@@ -530,7 +492,6 @@ public class FTGui extends JFrame implements ActionListener,
 		for (Map.Entry<String, JCheckBox> cbx : jCheckBoxMap.entrySet()){
 			if (e.getSource() == cbx.getValue()) {
 	        	logger.debug("Change state of checkbox "+cbx.getKey());
-				fileExtMap.get(cbx.getKey()).setActive(cbx.getValue().isSelected());
 
 			}
 		}

@@ -1,11 +1,16 @@
 package org.ladeche.filetools.beans;
 
+import java.io.File;
 import java.io.IOException;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.io.FileUtils;
+
 
 public class FileToProcess extends ItemToProcess{
 	
@@ -29,24 +34,27 @@ public class FileToProcess extends ItemToProcess{
 	
 	public int countItemsToProcess() {
         return 1;
-	};
+	}
 	
 	public boolean add(ItemToProcess itemToProcessToAdd) {
         return false;
-	};
+	}
 	
 	public boolean remove(ItemToProcess itemToProcessToRemove) {
         return false;
-	};
+	}
 	
-
-	@Override
-	public String toString() {
-		return   this.id+":"
-				+this.fullPath + ":"
-				+this.relativePath + ":" 
-				+this.fileName;
-
+	public boolean copyTo (String destinationFile) {
+		logger.debug("(File)From "+this.fullPath+ " To "+destinationFile);
+		try {
+			File source = new File(this.fullPath);
+			Files.copy(source.toPath(),Paths.get(destinationFile),NOFOLLOW_LINKS);
+			// Prévoir une procédure de recréation du lien copy de lien
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 }

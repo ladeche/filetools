@@ -26,12 +26,14 @@ public abstract class ItemToProcess {
 
 	public ItemToProcess (String fullPath) {
 		this.fullPath = fullPath;
+		this.fileName = fullPath.substring(fullPath.lastIndexOf("/")+1);
 		this.size=new Long(0);
 		//this.fileName = fullPath.substring(relativePath.lastIndexOf(".")+1);
 	}
 
 	public ItemToProcess (String fullPath, long length) {
 		this.fullPath = fullPath;
+		this.fileName = fullPath.substring(fullPath.lastIndexOf("/")+1);
 		this.size=(Long)length;
 		//this.fileName = fullPath.substring(relativePath.lastIndexOf(".")+1);
 	}
@@ -50,13 +52,16 @@ public abstract class ItemToProcess {
      * Remove item from itemlist
      */
 	public abstract boolean remove(ItemToProcess itemToProcessToRemove);
-
+    /**
+     * Copy item to destination
+     */
+	public abstract boolean copyTo(String destinationFile);
 
 	public String toString() {
 		return   this.id+":"
 				+this.fullPath + ":"
 //				+this.relativePath + ":" 
-//				+this.fileName
+				+this.fileName + ":"
 				+this.size;
 
 	}

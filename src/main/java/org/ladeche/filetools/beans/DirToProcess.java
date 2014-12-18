@@ -1,12 +1,11 @@
 package org.ladeche.filetools.beans;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
-import org.ladeche.filetools.FTGui;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DirToProcess extends ItemToProcess {
     //static final Logger logger = LoggerFactory.getLogger(FTGui.class);
@@ -55,8 +54,11 @@ public class DirToProcess extends ItemToProcess {
 		ListIterator listIterator = children.listIterator();
 		return listIterator;
 	}
-
-	public ArrayList<ItemToProcess> listDirectoryContent() {
+	
+    /**
+     * List all children at all levels and store result in children
+     */
+	public ArrayList<ItemToProcess> listDirectoryContentFull() {
 		ArrayList<ItemToProcess> arrayList = new ArrayList<ItemToProcess>();
 		DirToProcess childDir;
 		
@@ -72,7 +74,7 @@ public class DirToProcess extends ItemToProcess {
 				// Add Directory
 				logger.debug("AddDirectory");
 				childDir = new DirToProcess(list[i].getAbsolutePath());
-				childDir.listDirectoryContent();
+				childDir.listDirectoryContentFull();
 				arrayList.add(childDir);
 				this.size=this.size+childDir.size;
 			} else {
@@ -87,6 +89,61 @@ public class DirToProcess extends ItemToProcess {
 		this.children=arrayList;
 		return arrayList;
 
+	}
+	
+    /**
+     * List only items into first level
+     */
+	public ArrayList<ItemToProcess> listDirectoryContentSimple() {
+		logger.debug("listDirectoryContentSimple:"+this.fullPath);
+
+		ArrayList<ItemToProcess> arrayList = new ArrayList<ItemToProcess>();
+		
+		// List directory children
+		File file = new File(this.fullPath);
+		File[] list = file.listFiles();
+
+		// Parse children
+		for (int i = 0; i < list.length; i++) {
+			if (list[i].isDirectory()) {
+				// Add Directory
+				arrayList.add(new DirToProcess(list[i].getAbsolutePath()));
+			} else {
+				// Add simple file and increment size
+				arrayList.add(new FileToProcess(list[i].getAbsolutePath(),list[i].length()));
+			}
+
+		}
+		return arrayList;
+	}
+	
+    /**
+     * Copy directory and content to destination
+     */
+	public boolean copyTo (String destinationFile) {
+		logger.debug("(Dir)From "+this.fullPath+ " To "+destinationFile);
+		ArrayList<ItemToProcess> dirContent = this.listDirectoryContentSimple();
+		
+		try {
+			// create directory
+			File source = new File(this.fullPath);
+			File dest = new File(destinationFile);
+			Files.copy(source.toPath(),dest.toPath());
+			
+			// Now parse directory content
+			for (ItemToProcess itp : dirContent) {
+				if (itp instanceof DirToProcess) {
+					((DirToProcess) itp).copyTo(destinationFile+"/"+itp.getFileName());
+				} else {
+					itp.copyTo(destinationFile+"/"+itp.getFileName());
+				}
+			}       
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 
 }

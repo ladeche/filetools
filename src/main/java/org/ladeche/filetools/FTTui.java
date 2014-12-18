@@ -12,12 +12,18 @@ public class FTTui {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		logger.debug("Start");
-		DirToProcess dirToProcess = new DirToProcess("/home/poseidon/Documents");
-		ArrayList arrayList = dirToProcess.listDirectoryContent();
+		logger.debug("*** ANALYSE 1 ***");
+
+		DirToProcess dirToProcess = new DirToProcess("/home/poseidon/Documents/Scolaire");
+		ArrayList arrayList = dirToProcess.listDirectoryContentFull();
 		Integer size = (Integer)dirToProcess.getChildren().size();
 
-		DirToProcess dirToProcess2 = new DirToProcess("/media/MBL/documents");
-		ArrayList arrayList2 = dirToProcess2.listDirectoryContent();
+		logger.debug("*** COPIE 2 ***");
+		DirToProcess dirToProcess2 = new DirToProcess("/media/MBL-Public/test");
+		dirToProcess.copyTo(dirToProcess2.getFullPath());
+		
+		logger.debug("*** ANALYSE 2 ***");
+		ArrayList arrayList2 = dirToProcess2.listDirectoryContentFull();
 		Integer size2 = (Integer)dirToProcess2.getChildren().size();
 		
 		

@@ -4,59 +4,54 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 
 public class DirToProcess extends ItemToProcess {
-    //static final Logger logger = LoggerFactory.getLogger(FTGui.class);
 
-	public DirToProcess(String relativePath, String sourcedir) {
-		super(relativePath, sourcedir);
-
-		this.children = new ArrayList();
-	}
+	protected ArrayList<ItemToProcess> children;
 
 	public DirToProcess(String fullPath) {
 		super(fullPath);
+		this.children = new ArrayList<ItemToProcess>();
 		logger.debug(this.toString());
 	}
 
-	public int countItemsToProcess() {
-		int totalItemsToProcess = 0;
-		ListIterator listIterator = this.createListIterator();
-		ItemToProcess itemToProcess;
-		while (listIterator.hasNext()) {
-			itemToProcess = (ItemToProcess) listIterator.next();
-			totalItemsToProcess += itemToProcess.countItemsToProcess();
-		}
-		return totalItemsToProcess;
+	public DirToProcess (String fullPath, long length) {
+		super(fullPath,length);
+		this.children = new ArrayList<ItemToProcess>();
+		logger.debug(this.toString());
+	}
+	public DirToProcess (String fullPath, String rootPath) {
+		super(fullPath,rootPath);
+		this.children = new ArrayList<ItemToProcess>();
+		logger.debug(this.toString());
 	}
 
-	public boolean add(ItemToProcess itemToProcessToAdd) {
-		itemToProcessToAdd.setParent(this);
-		return children.add(itemToProcessToAdd);
-	}
-
-	public boolean remove(ItemToProcess itemToProcessToRemove) {
-		ListIterator listIterator = this.createListIterator();
-		ItemToProcess itemToProcess;
-		while (listIterator.hasNext()) {
-			itemToProcess = (ItemToProcess) listIterator.next();
-			if (itemToProcess == itemToProcessToRemove) {
-				listIterator.remove();
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public ListIterator createListIterator() {
-		ListIterator listIterator = children.listIterator();
-		return listIterator;
+	public DirToProcess (String fullPath, String rootPath, long length) {
+		super(fullPath,rootPath,length);
+		this.children = new ArrayList<ItemToProcess>();
+		logger.debug(this.toString());
 	}
 	
+	public ArrayList<ItemToProcess> getChildren() {
+		return children;
+	}
+
+	public void setChildren(ArrayList<ItemToProcess> children) {
+		this.children = children;
+	}
+
+	
     /**
-     * List all children at all levels and store result in children
+     * Add a child file to children
+     */
+	public boolean add(ItemToProcess itemToProcess) {
+		return children.add(itemToProcess);
+	}
+
+	
+    /**
+     * List all children at all levels and initialize children with result
      */
 	public ArrayList<ItemToProcess> listDirectoryContentFull() {
 		ArrayList<ItemToProcess> arrayList = new ArrayList<ItemToProcess>();
@@ -78,10 +73,17 @@ public class DirToProcess extends ItemToProcess {
 				arrayList.add(childDir);
 				this.size=this.size+childDir.size;
 			} else {
-				logger.debug("AddFile");
-				// Add simple file and increment size
-				arrayList.add(new FileToProcess(list[i].getAbsolutePath(),list[i].length()));
-				this.size=this.size+list[i].length();
+				if (Files.isSymbolicLink(list[i].toPath())) {
+					logger.debug("AddLink");
+					// Add simple file and increment size
+					arrayList.add(new LinkToProcess(list[i].getAbsolutePath(),list[i].length()));
+					this.size=this.size+list[i].length();
+				} else {
+					logger.debug("AddFile");
+					// Add simple file and increment size
+					arrayList.add(new FileToProcess(list[i].getAbsolutePath(),list[i].length()));
+					this.size=this.size+list[i].length();
+				}
 			}
 
 		}
@@ -109,8 +111,14 @@ public class DirToProcess extends ItemToProcess {
 				// Add Directory
 				arrayList.add(new DirToProcess(list[i].getAbsolutePath()));
 			} else {
+				if (Files.isSymbolicLink(list[i].toPath())) {
+					// Add simple file and increment size
+					arrayList.add(new LinkToProcess(list[i].getAbsolutePath()));
+				} else {
+					// Add simple file and increment size
+					arrayList.add(new FileToProcess(list[i].getAbsolutePath()));
+				}
 				// Add simple file and increment size
-				arrayList.add(new FileToProcess(list[i].getAbsolutePath(),list[i].length()));
 			}
 
 		}

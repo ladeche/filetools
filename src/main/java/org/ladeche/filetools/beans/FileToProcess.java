@@ -1,26 +1,16 @@
 package org.ladeche.filetools.beans;
 
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
+
 import java.io.File;
 import java.io.IOException;
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-
-import org.apache.commons.io.FileUtils;
 
 
 public class FileToProcess extends ItemToProcess{
 	
-    //static final Logger logger = LoggerFactory.getLogger(FileToProcess.class);
-	
-    public FileToProcess(String relativePath, String sourcedir) {
-		super(relativePath,sourcedir);
 
-        this.children = new ArrayList();
-    }
 	public FileToProcess (String fullPath) {
 		super(fullPath);
 		logger.debug(this.toString());
@@ -29,21 +19,21 @@ public class FileToProcess extends ItemToProcess{
 	public FileToProcess (String fullPath, long length) {
 		super(fullPath,length);
 		logger.debug(this.toString());
-		//this.fileName = fullPath.substring(relativePath.lastIndexOf(".")+1);
 	}
-	
-	public int countItemsToProcess() {
-        return 1;
+	public FileToProcess (String fullPath, String rootPath) {
+		super(fullPath,rootPath);
+		logger.debug(this.toString());
 	}
-	
-	public boolean add(ItemToProcess itemToProcessToAdd) {
-        return false;
+
+	public FileToProcess (String fullPath, String rootPath, long length) {
+		super(fullPath,rootPath,length);
+		logger.debug(this.toString());
 	}
+
 	
-	public boolean remove(ItemToProcess itemToProcessToRemove) {
-        return false;
-	}
-	
+    /**
+     * Copy file to destination
+     */
 	public boolean copyTo (String destinationFile) {
 		logger.debug("(File)From "+this.fullPath+ " To "+destinationFile);
 		try {
